@@ -21,18 +21,28 @@ public class BookController {
 
     String readyToUse = "DISPONIVEL";
     String leased = "LOCADO";
+    ChecksListBooks checksListBooks =new ChecksListBooks();
 
     //POST - Criar Livro
     @PostMapping("/create")
     public BookModel bookCreate(@RequestBody BookModel book) {
-        // Ja seta livro como disponivel para locar
         book.setStatusBook(readyToUse);
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return this.bookRepository.save(book);
     }
 
     //GET - Procura livro pelo NOME
     @GetMapping("/title/{title}")
     public List<BookModel> findTitle(@PathVariable("title") String title) {
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return this.bookRepository.findByTitleIgnoreCase(title);
     }
 
@@ -44,6 +54,11 @@ public class BookController {
         inBook.get().setAuthor(bookDetails.getAuthor());
         inBook.get().setTitle(bookDetails.getTitle());
         bookRepository.save(inBook.get());
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return ResponseEntity.accepted().body(inBook.get());
     }
 

@@ -4,10 +4,10 @@ import com.vitor.biblioteca.models.BookModel;
 import com.vitor.biblioteca.models.UserModel;
 import com.vitor.biblioteca.models.repository.BookRepository;
 import com.vitor.biblioteca.models.repository.UserRepository;
-import com.vitor.biblioteca.services.CalcDate;
 import com.vitor.biblioteca.services.ChecksListBooks;
 import com.vitor.biblioteca.services.DeliveryBook;
 import com.vitor.biblioteca.services.RentBook;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +52,11 @@ public class UserController {
     // GET - Traz usario do ID especifico
     @GetMapping("/{id}")
     public ResponseEntity<UserModel> userScan(@PathVariable("id") Integer id) {
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         Optional<UserModel> userFind = this.userRepository.findById(id);
 
         if (userFind.isPresent()) {
@@ -63,7 +68,32 @@ public class UserController {
     //GET - Procura usuario pelo NOME
     @GetMapping("/name/{name}")
     public List<UserModel> findName(@PathVariable("name") String name) {
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return this.userRepository.findByNameIgnoreCase(name);
+    }
+
+    //PUT - Editar livros
+    @PutMapping("/{idUser}/edit")
+    public ResponseEntity<UserModel> userEdit(
+            @PathVariable("idUser") Integer idUser,
+            @RequestBody UserModel userDetails) throws Exception {
+
+        Optional<UserModel> inUser = userRepository.findById(idUser);
+        inUser.get().setName(userDetails.getName());
+        inUser.get().setEmail(userDetails.getEmail());
+        userRepository.save(inUser.get());
+
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.accepted().body(inUser.get());
     }
 
     @PutMapping("{idUser}/books/{idBook}/rent")
@@ -82,6 +112,8 @@ public class UserController {
         return deliveryBook.toolBookDelivery(idUser,idBook,userRepository,bookRepository);
 
     }
+
+
 
 
 }
