@@ -81,8 +81,8 @@ public class UserController {
         Optional<UserModel> inUser = userRepository.findById(idUser);
         Optional<BookModel> inBook = bookRepository.findById(idBook);
 
-        var getUserStatus = inUser.get().getStatusUser();
-        var getBookStatus = inBook.get().getStatusBook();
+        String getUserStatus = inUser.get().getStatusUser();
+        String getBookStatus = inBook.get().getStatusBook();
 
         if (getUserStatus != null
                 | getBookStatus.equals(leased)
@@ -114,7 +114,7 @@ public class UserController {
         Optional<UserModel> inUser = userRepository.findById(idUser);
         Optional<BookModel> inBook = bookRepository.findById(idBook);
 
-        var userId = idUser.toString();
+        String userId = idUser.toString();
 
         if(inBook.get().getStatusBook().equals(readyToUse)){
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
