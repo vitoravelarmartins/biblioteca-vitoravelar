@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class CalcDate {
-    public Integer toolCalcDate(@PathVariable("dateSend") String dateSend) {
+    public Integer toolCalcDate(String dateSend) {
 
         Date dateToday = new Date(System.currentTimeMillis());
         SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd hh:mm");

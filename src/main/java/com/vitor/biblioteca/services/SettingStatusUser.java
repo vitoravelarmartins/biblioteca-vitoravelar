@@ -8,11 +8,13 @@ import java.util.Optional;
 
 public class SettingStatusUser {
 
-    public void toolSettingStatusUser(@PathVariable("idBook") Integer idBook, @PathVariable("statusValueUser") String statusValueUser, @PathVariable("bookRepo") BookRepository bookRepository) throws Exception {
+    public void toolSettingStatusUser(Integer idBook,
+                                      String statusValueUser,
+                                      BookRepository bookRepository) throws Exception {
+
         Optional<BookModel> inBook = bookRepository.findById(idBook);
         inBook.get().getIdUser().getStatusUser();
         inBook.get().getIdUser().setStatusUser(statusValueUser);
         bookRepository.save(inBook.get());
     }
-
 }

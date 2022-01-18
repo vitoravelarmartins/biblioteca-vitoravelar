@@ -8,7 +8,8 @@ import java.util.Optional;
 
 public class CalcDateInBook {
     String readyToUse = "DISPONIVEL";
-    public Integer toolCalcDateInBook(@PathVariable("idBook") Integer idBook, @PathVariable("bookRepo") BookRepository bookRepository) {
+
+    public Integer toolCalcDateInBook(Integer idBook, BookRepository bookRepository) {
 
         CalcDate calcDate = new CalcDate();
         Optional<BookModel> inBook = bookRepository.findById(idBook);

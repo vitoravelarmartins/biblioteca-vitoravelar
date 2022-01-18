@@ -41,10 +41,8 @@ public class BookController {
     public ResponseEntity<BookModel> bookEdit(@PathVariable("idBook") Integer idBook, @RequestBody BookModel bookDetails) throws Exception {
 
         Optional<BookModel> inBook = bookRepository.findById(idBook);
-
         inBook.get().setAuthor(bookDetails.getAuthor());
         inBook.get().setTitle(bookDetails.getTitle());
-
         bookRepository.save(inBook.get());
         return ResponseEntity.accepted().body(inBook.get());
     }
