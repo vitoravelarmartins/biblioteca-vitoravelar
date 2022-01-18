@@ -17,16 +17,10 @@ public class UserModel {
     @Column(nullable = false)
     private String email;
     private String statusUser;
-    @ManyToOne
-    @JoinColumn(name = "id_book")
-    private BookModel idBook;
+
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -52,14 +46,5 @@ public class UserModel {
     public void setStatusUser(String statusUser) {
         this.statusUser = statusUser;
     }
-
-    public BookModel getIdBook() {
-        return idBook;
-    }
-
-    public void setIdBook(BookModel idBook) {
-        this.idBook = idBook;
-    }
-// UserModel user = new UserModel();
 
 }

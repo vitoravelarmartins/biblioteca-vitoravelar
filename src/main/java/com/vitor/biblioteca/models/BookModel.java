@@ -29,10 +29,6 @@ public class BookModel {
         return idBook;
     }
 
-    public void setIdBook(Integer idBook) {
-        this.idBook = idBook;
-    }
-
     public String getTitle() {
         return title;
     }
