@@ -1,10 +1,10 @@
 package com.vitor.biblioteca.services;
 
+import com.vitor.biblioteca.exception.CanNotDo;
 import com.vitor.biblioteca.models.BookModel;
 import com.vitor.biblioteca.models.UserModel;
 import com.vitor.biblioteca.models.repository.BookRepository;
 import com.vitor.biblioteca.models.repository.UserRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
@@ -14,14 +14,10 @@ public class RentBook {
     String leased = "LOCADO";
     String withinTime = "DENTRO DO PRAZO";
     CalcDate calcDate = new CalcDate();
-    ChecksListBooks checksListBooks =new ChecksListBooks();
+    ChecksListBooks checksListBooks = new ChecksListBooks();
 
 
-    public ResponseEntity<BookModel> toolRentBook(Integer idUser,
-                                                  Integer idBook,
-                                                  BookModel bookDetails,
-                                                  UserRepository userRepository,
-                                                  BookRepository bookRepository) throws Exception {
+    public ResponseEntity<BookModel> toolRentBook(Integer idUser, Integer idBook, BookModel bookDetails, UserRepository userRepository, BookRepository bookRepository) {
 
 
         Optional<UserModel> inUser = userRepository.findById(idUser);
@@ -35,16 +31,11 @@ public class RentBook {
                 | bookDetails.getDateRent() == null
                 | bookDetails.getDateDelivery() == null) {
 
-            try {
-                checksListBooks.toolChecksListBooks(bookRepository);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            verifyStatusBooks(bookRepository);
 
-            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+          throw new CanNotDo("Livro locado ou com dataRent e dataDelivery igual a NULL");
 
-        } else if (calcDate.toolCalcDate(bookDetails.getDateRent()) >= 0
-                & calcDate.toolCalcDate(bookDetails.getDateDelivery()) >= 0) {
+        } else if (calcDate.toolCalcDate(bookDetails.getDateRent()) >= 0 & calcDate.toolCalcDate(bookDetails.getDateDelivery()) >= 0) {
             inBook.get().setIdUser(inUser.get());
             inBook.get().setDateRent(bookDetails.getDateRent());
             inBook.get().setDateDelivery(bookDetails.getDateDelivery());
@@ -52,20 +43,26 @@ public class RentBook {
             inUser.get().setStatusUser(withinTime);
             bookRepository.save(inBook.get());
 
-            try {
-                checksListBooks.toolChecksListBooks(bookRepository);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            verifyStatusBooks(bookRepository);
 
 
             return ResponseEntity.accepted().body(inBook.get());
 
 
         } else
-            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            throw new CanNotDo("Data invalida, ou menor que data atual");
 
 
+
+    }
+
+    private void verifyStatusBooks(BookRepository bookRepository) {
+        ChecksListBooks checksListBooks = new ChecksListBooks();
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

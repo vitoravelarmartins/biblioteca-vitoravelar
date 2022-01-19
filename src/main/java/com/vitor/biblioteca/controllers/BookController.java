@@ -1,5 +1,6 @@
 package com.vitor.biblioteca.controllers;
 
+import com.vitor.biblioteca.exception.CanNotDo;
 import com.vitor.biblioteca.models.BookModel;
 import com.vitor.biblioteca.models.repository.BookRepository;
 import com.vitor.biblioteca.services.ChecksListBooks;
@@ -21,28 +22,20 @@ public class BookController {
 
     String readyToUse = "DISPONIVEL";
     String leased = "LOCADO";
-    ChecksListBooks checksListBooks =new ChecksListBooks();
+
 
     //POST - Criar Livro
     @PostMapping("/create")
     public BookModel bookCreate(@RequestBody BookModel book) {
         book.setStatusBook(readyToUse);
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       verifyStatusBooks(bookRepository);
         return this.bookRepository.save(book);
     }
 
     //GET - Procura livro pelo NOME
     @GetMapping("/title/{title}")
     public List<BookModel> findTitle(@PathVariable("title") String title) {
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        verifyStatusBooks(bookRepository);
         return this.bookRepository.findByTitleIgnoreCase(title);
     }
 
@@ -54,11 +47,7 @@ public class BookController {
         inBook.get().setAuthor(bookDetails.getAuthor());
         inBook.get().setTitle(bookDetails.getTitle());
         bookRepository.save(inBook.get());
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        verifyStatusBooks(bookRepository);
         return ResponseEntity.accepted().body(inBook.get());
     }
 
@@ -67,21 +56,29 @@ public class BookController {
     public ResponseEntity<BookModel> deleteBook(@PathVariable("idBook") Integer idBook){
         Optional<BookModel> inBook = bookRepository.findById(idBook);
         if(inBook.get().getStatusBook().equals(leased)){
-            return  new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            throw new CanNotDo("Não pode deletar livro locado!");
         }else
+            verifyStatusBooks(bookRepository);
             bookRepository.delete(inBook.get());
         return  new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/list")
     public List<BookModel> listBook() throws Exception {
-
         ChecksListBooks checksListBooks =new ChecksListBooks();
         checksListBooks.toolChecksListBooks(bookRepository);
         return this.bookRepository.findAll();
 
     }
 
+    private void verifyStatusBooks(BookRepository bookRepository) {
+        ChecksListBooks checksListBooks = new ChecksListBooks();
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

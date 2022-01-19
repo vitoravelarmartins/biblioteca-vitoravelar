@@ -1,5 +1,6 @@
 package com.vitor.biblioteca.controllers;
 
+import com.vitor.biblioteca.exception.ThereIsNot;
 import com.vitor.biblioteca.models.BookModel;
 import com.vitor.biblioteca.models.UserModel;
 import com.vitor.biblioteca.models.repository.BookRepository;
@@ -7,9 +8,7 @@ import com.vitor.biblioteca.models.repository.UserRepository;
 import com.vitor.biblioteca.services.ChecksListBooks;
 import com.vitor.biblioteca.services.DeliveryBook;
 import com.vitor.biblioteca.services.RentBook;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,54 +24,37 @@ public class UserController {
     @Autowired
     private BookRepository bookRepository;
 
-    ChecksListBooks checksListBooks =new ChecksListBooks();
 
     //POST - Criar Usuarios
     @PostMapping("/create")
     public UserModel userAdd(@RequestBody UserModel user) {
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        verifyStatusBooks(bookRepository);
         return this.userRepository.save(user);
     }
 
     //GET - Traz uma lista de todos os ususarios
     @GetMapping("/list")
     public List<UserModel> list() {
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        verifyStatusBooks(bookRepository);
         return this.userRepository.findAll();
     }
 
     // GET - Traz usario do ID especifico
     @GetMapping("/{id}")
     public ResponseEntity<UserModel> userScan(@PathVariable("id") Integer id) {
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        verifyStatusBooks(bookRepository);
         Optional<UserModel> userFind = this.userRepository.findById(id);
 
         if (userFind.isPresent()) {
             return ResponseEntity.accepted().body(userFind.get());
         }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        throw new ThereIsNot("Usuário não existe");
     }
 
     //GET - Procura usuario pelo NOME
     @GetMapping("/name/{name}")
     public List<UserModel> findName(@PathVariable("name") String name) {
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        verifyStatusBooks(bookRepository);
         return this.userRepository.findByNameIgnoreCase(name);
     }
 
@@ -81,20 +63,20 @@ public class UserController {
     public ResponseEntity<UserModel> userEdit(
             @PathVariable("idUser") Integer idUser,
             @RequestBody UserModel userDetails) throws Exception {
-
         Optional<UserModel> inUser = userRepository.findById(idUser);
-        inUser.get().setName(userDetails.getName());
-        inUser.get().setEmail(userDetails.getEmail());
-        userRepository.save(inUser.get());
 
-        try {
-            checksListBooks.toolChecksListBooks(bookRepository);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (inUser.isPresent()) {
+            inUser.get().setName(userDetails.getName());
+            inUser.get().setEmail(userDetails.getEmail());
+            userRepository.save(inUser.get());
+
+            verifyStatusBooks(bookRepository);
+
+            return ResponseEntity.accepted().body(inUser.get());
         }
-
-        return ResponseEntity.accepted().body(inUser.get());
+        throw new ThereIsNot("Usuário não existe");
     }
+
 
     @PutMapping("{idUser}/books/{idBook}/rent")
     public ResponseEntity bookRent(@PathVariable("idUser") Integer idUser,
@@ -114,6 +96,14 @@ public class UserController {
     }
 
 
+    private void verifyStatusBooks(BookRepository bookRepository) {
+        ChecksListBooks checksListBooks = new ChecksListBooks();
+        try {
+            checksListBooks.toolChecksListBooks(bookRepository);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

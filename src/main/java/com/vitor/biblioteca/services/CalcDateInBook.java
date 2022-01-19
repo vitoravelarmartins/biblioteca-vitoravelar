@@ -2,7 +2,7 @@ package com.vitor.biblioteca.services;
 
 import com.vitor.biblioteca.models.BookModel;
 import com.vitor.biblioteca.models.repository.BookRepository;
-import org.springframework.web.bind.annotation.PathVariable;
+
 
 import java.util.Optional;
 
