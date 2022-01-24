@@ -12,8 +12,8 @@ public class SettingStatusUser {
                                       BookRepository bookRepository) throws Exception {
 
         Optional<BookModel> inBook = bookRepository.findById(idBook);
-        inBook.get().getIdUser().getStatusUser();
-        inBook.get().getIdUser().setStatusUser(statusValueUser);
+     //   inBook.get().getIdUser().getStatusUser();
+     //   inBook.get().getIdUser().setStatusUser(statusValueUser);
         bookRepository.save(inBook.get());
     }
 }

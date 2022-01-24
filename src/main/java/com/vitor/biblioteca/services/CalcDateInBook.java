@@ -17,6 +17,6 @@ public class CalcDateInBook {
         if (inBook.get().getStatusBook().equals(readyToUse)) {
             return 2; //Livros que não foram LOCADOS vão retonar "2"
         } else
-            return calcDate.toolCalcDate(inBook.get().getDateDelivery());
+            return 1 ;//calcDate.toolCalcDate(inBook.get().getDateDelivery());
     }
 }
