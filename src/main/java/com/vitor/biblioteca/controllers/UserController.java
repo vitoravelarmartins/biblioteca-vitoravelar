@@ -1,12 +1,14 @@
 package com.vitor.biblioteca.controllers;
 
+import com.vitor.biblioteca.exception.ApiExeceptionHandler;
 import com.vitor.biblioteca.exception.ThereIsNot;
 import com.vitor.biblioteca.models.UserModel;
-import com.vitor.biblioteca.models.repository.BookRepository;
 import com.vitor.biblioteca.models.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,8 +19,6 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private BookRepository bookRepository;
 
 
     //POST - Criar Usuarios
@@ -33,24 +33,29 @@ public class UserController {
         return this.userRepository.findAll();
     }
 
-    // GET - Traz usario do ID especifico
-    @GetMapping("/{id}")
-    public ResponseEntity<UserModel> userScan(@PathVariable("id") Long idUser) {
-        Optional<UserModel> userFind = this.userRepository.findById(Math.toIntExact(idUser));
+     //GET - Traz usario do ID especifico
+    @GetMapping("/{idUser}")
+    public ResponseEntity<UserModel> userScan(@PathVariable("idUser") Integer idUser) {
+        Optional<UserModel> userFind = this.userRepository.findById(idUser);
         if (userFind.isPresent()) {
             return ResponseEntity.accepted().body(userFind.get());
         }
-        throw new ThereIsNot("Usuário não existe");
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    //GET - Procura usuario pelo NOME
-    @GetMapping("/{name}")
-    public List<UserModel> findName(@RequestParam(value ="name") String name) {
-        return this.userRepository.findByNameIgnoreCase(name);
+    @RequestMapping(value ={"/filter"}, method = RequestMethod.GET)
+    public ResponseEntity<UserModel> findName(@RequestParam(value = "name") String name) {
+       Optional<UserModel> lisUserModel = this.userRepository.findByNameContains(name);
+        if (lisUserModel.isPresent()){
+            return ResponseEntity.accepted().body(lisUserModel.get());
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+
     }
 
-    //PUT - Editar Userd
-    @PutMapping("/{idUser}/edit")
+       //PUT - Editar Userd
+    @PutMapping("/{idUser}")
     public ResponseEntity<UserModel> userEdit(
             @PathVariable("idUser") Integer idUser,
             @RequestBody UserModel userDetails) throws Exception {
